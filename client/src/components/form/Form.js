@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Paper, TextField, Typography, Button } from "@material-ui/core";
 import FileBase from "react-file-base64";
 import useStyle from "./styles";
-import { useDispatch } from "react-redux";
-import { createPosts } from "../../redux/actions/posts.action";
+import { useDispatch, useSelector } from "react-redux";
+import { createPosts, updatePost } from "../../redux/actions/posts.action";
 
-const Form = () => {
+const Form = ({ currentId, setCurrentId }) => {
   const [postData, setPostData] = useState({
     creator: "",
     title: "",
@@ -13,10 +13,15 @@ const Form = () => {
     tags: "",
     selectedFile: "",
   });
-
-  const classes = useStyle();
-
   const dispatch = useDispatch();
+
+  const post = useSelector((state) =>
+    currentId ? state.posts.find((p) => p._id === currentId) : null
+  );
+
+  useEffect(() => {
+    if (post) setPostData(post);
+  }, [post]);
 
   const handleInput = (e) => {
     const { name, value } = e.target;
@@ -24,14 +29,27 @@ const Form = () => {
     setPostData({ ...postData, [name]: value });
   };
 
-  const clear = () => {};
-
   const handleSubmit = (e) => {
     e.preventDefault();
-
-    dispatch(createPosts(postData));
+    if (post) {
+      dispatch(updatePost(currentId, postData));
+    } else {
+      dispatch(createPosts(postData));
+    }
+    clear();
+  };
+  const clear = () => {
+    setCurrentId(null);
+    setPostData({
+      creator: "",
+      title: "",
+      message: "",
+      tags: "",
+      selectedFile: "",
+    });
   };
 
+  const classes = useStyle();
   return (
     <Paper className={classes.paper}>
       <form
@@ -40,7 +58,9 @@ const Form = () => {
         noValidate
         className={`${classes.form} ${classes.root}`}
       >
-        <Typography variant="h6">Creating a Memories</Typography>
+        <Typography variant="h6">
+          {currentId ? "Editing" : "Creating"} a Memories
+        </Typography>
         <TextField
           className={classes.root}
           name="creator"
@@ -64,7 +84,7 @@ const Form = () => {
           variant="outlined"
           fullWidth
           multiline
-          rows={2}
+          minRows={2}
           value={postData.message}
           onChange={handleInput}
         />
@@ -74,7 +94,10 @@ const Form = () => {
           variant="outlined"
           fullWidth
           value={postData.tags}
-          onChange={handleInput}
+          // onChange={handleInput}
+          onChange={(e) =>
+            setPostData({ ...postData, tags: e.target.value.split(",") })
+          }
         />
         <div className={classes.fileInput}>
           <FileBase
