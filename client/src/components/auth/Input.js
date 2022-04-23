@@ -12,7 +12,7 @@ const Input = ({
   type,
 }) => {
   return (
-    <Grid xs={6} sm={half ? 6 : 12}>
+    <Grid item xs={6} sm={half ? 6 : 12}>
       <TextField
         name={name}
         onChange={handleChange}

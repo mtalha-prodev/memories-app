@@ -19,7 +19,7 @@ const Auth = () => {
   const handleSubmit = (e) => {};
 
   const classes = useStyles();
-  const isSignup = false;
+  const isSignup = true;
   return (
     <Container component="main" maxWidth="xs">
       <Paper className={classes.paper} elevation={3}>
